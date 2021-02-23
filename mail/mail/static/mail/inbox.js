@@ -1,3 +1,24 @@
+const inboxURL = '/emails/inbox'
+const sentURL = '/emails/sent'
+const archivedURL = '/emails/archived'
+
+async function getInbox() {
+  const response = await fetch(inboxURL);
+  const data = await response.json();
+  data.forEach(element => console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`));
+}
+async function getSent() {
+  const response = await fetch(sentURL);
+  const data = await response.json();
+  data.forEach(element => console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`));
+}
+async function getArchived() {
+  const response = await fetch(archivedURL);
+  const data = await response.json();
+  data.forEach(element => console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`));
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
 
   // Use buttons to toggle between views
@@ -60,35 +81,23 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 })
 
+
+
+// Show inbox, sent and archived mailboxes
 document.addEventListener('DOMContentLoaded', () => {
-  
+
   document.querySelector('#inbox').onclick = () => {
-    fetch('/emails/inbox')
-    .then(response => response.json())
-    .then(emails => {
-      // Print emails
-      console.log(emails);
-      
-    });
+    getInbox();
   };
   
   document.querySelector('#sent').onclick = () => {
-    fetch('/emails/sent')
-    .then(response => response.json())
-    .then(emails => {
-      // Print emails
-      console.log(emails);
-      // ... do something else with emails ...
-    });
+    getSent();
   };
 
-  document.querySelector('#archive').onclick = () => {
-    fetch('/emails/archive')
-    .then(response => response.json())
-    .then(emails => {
-      // Print emails
-      console.log(emails);
-      // ... do something else with emails ...
-    });
+  document.querySelector('#archived').onclick = () => {
+    getArchived();
   };
 });
+
+
+
