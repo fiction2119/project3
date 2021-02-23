@@ -7,15 +7,30 @@ async function getInbox() {
   const data = await response.json();
   data.forEach(element => console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`));
 }
+
 async function getSent() {
   const response = await fetch(sentURL);
   const data = await response.json();
-  data.forEach(element => console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`));
+  console.log(typeof data);
+  console.log(data);
+  console.log(data[0]['sender']); //THIS CARALHO
+  console.log(typeof data[0]);
+  /*for (const element in data) {
+    console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`);
+  }
+  /*for (let i = 0; i < data.length; i++) {
+    element = data.getJSONObject(i);
+    let li = document.createElement('li');
+    li.innerHTML = `${element.sender} | ${element.subject} -> ${element.timestamp}`;
+    document.querySelector('#container').append(li);
+  }*/
+
 }
 async function getArchived() {
   const response = await fetch(archivedURL);
   const data = await response.json();
   data.forEach(element => console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`));
+  
 }
 
 
@@ -88,15 +103,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelector('#inbox').onclick = () => {
     getInbox();
+    const element = document.createElement('div');
+    element.innerHTML = getInbox();
   };
   
   document.querySelector('#sent').onclick = () => {
     getSent();
+    const element = document.createElement('div');
+    console.log(getSent())
   };
 
   document.querySelector('#archived').onclick = () => {
     getArchived();
   };
+
+
 });
 
 
