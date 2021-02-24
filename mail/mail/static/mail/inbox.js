@@ -2,48 +2,76 @@ const inboxURL = '/emails/inbox'
 const sentURL = '/emails/sent'
 const archivedURL = '/emails/archived'
 
+// Get inbox json data 
 async function getInbox() {
   const response = await fetch(inboxURL);
   const data = await response.json();
-  data.forEach(element => console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`));
+
+  // Show inbox mail data
+  for (let i = 0; i < data.length; i++) {
+    let div = document.createElement('div');
+    div.innerHTML = `${data[i]['sender']} | ${data[i]['subject']} -> ${data[i]['timestamp']}`;
+    document.querySelector('#emails-view').append(div);
+  }
+  // Change color to gray if email has been read
+  if(data[i]['read'] === true) {
+    div.style.backgroundColor = "#DCDCDC";
+  }
+  else {
+    div.style.backgroundColor = "#FFFFFF";
+  }
 }
 
+// Get sent mails json data 
 async function getSent() {
   const response = await fetch(sentURL);
   const data = await response.json();
-  console.log(typeof data);
-  console.log(data);
-  console.log(data[0]['sender']); //THIS CARALHO
-  console.log(typeof data[0]);
-  /*for (const element in data) {
-    console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`);
-  }
-  /*for (let i = 0; i < data.length; i++) {
-    element = data.getJSONObject(i);
-    let li = document.createElement('li');
-    li.innerHTML = `${element.sender} | ${element.subject} -> ${element.timestamp}`;
-    document.querySelector('#container').append(li);
-  }*/
 
-}
+  // Show sent mail data
+  for (let i = 0; i < data.length; i++) {
+    let div = document.createElement('div');
+    
+    sender = data[i]['sender'];
+    subject = data[i]['subject'];
+    timestamp = data[i]['timestamp'];
+    id = data[i]['id'];
+    div.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
+    document.querySelector('#emails-view').append(div);
+    //`/emails/${data_id}`
+  }
+};
+
+// Get archived mails json data 
 async function getArchived() {
   const response = await fetch(archivedURL);
   const data = await response.json();
-  data.forEach(element => console.log(`${element.sender} | ${element.subject} -> ${element.timestamp}`));
-  
+
+  // Show archived mail data
+  for (let i = 0; i < data.length; i++) {
+    let li = document.createElement('li');
+    li.innerHTML = `${data[i]['sender']} | ${data[i]['subject']} -> ${data[i]['timestamp']}`;
+    document.querySelector('#emails-view').append(li);
+    
+  }
 }
 
-
 document.addEventListener('DOMContentLoaded', function() {
-
   // Use buttons to toggle between views
-  document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
-  document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
-  document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
-  document.querySelector('#compose').addEventListener('click', compose_email);
-
-  // Load sent by default
-  load_mailbox('sent')
+  document.querySelector('#inbox').addEventListener('click', () => {
+    load_mailbox('inbox');
+    getInbox();
+  });
+  document.querySelector('#sent').addEventListener('click', () => {
+    load_mailbox('sent');
+    getSent();
+  });
+  document.querySelector('#archived').addEventListener('click', () => {
+    load_mailbox('archived');
+    getArchived();
+  });
+  document.querySelector('#compose').addEventListener('click', () => {
+    compose_email();
+  }) 
 });
 
 function compose_email() {
@@ -59,7 +87,7 @@ function compose_email() {
 }
 
 function load_mailbox(mailbox) {
-  
+
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
@@ -68,7 +96,7 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 }
 
-// Submit email function
+// Submit Email Function
 document.addEventListener('DOMContentLoaded', () => {
 
   // Upon click, submit email
@@ -94,31 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log(result);
     });
   };
+  load_mailbox('sent');
 })
 
 
 
-// Show inbox, sent and archived mailboxes
-document.addEventListener('DOMContentLoaded', () => {
 
-  document.querySelector('#inbox').onclick = () => {
-    getInbox();
-    const element = document.createElement('div');
-    element.innerHTML = getInbox();
-  };
-  
-  document.querySelector('#sent').onclick = () => {
-    getSent();
-    const element = document.createElement('div');
-    console.log(getSent())
-  };
-
-  document.querySelector('#archived').onclick = () => {
-    getArchived();
-  };
-
-
-});
 
 
 
