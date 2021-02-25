@@ -9,11 +9,21 @@ async function getInbox() {
 
   // Show inbox mail data
   for (let i = 0; i < data.length; i++) {
-    let div = document.createElement('div');
-    div.innerHTML = `${data[i]['sender']} | ${data[i]['subject']} -> ${data[i]['timestamp']}`;
-    document.querySelector('#emails-view').append(div);
+    let anchor = document.createElement('a');
+    let br = document.createElement('br');
+    
+    sender = data[i]['sender'];
+    subject = data[i]['subject'];
+    timestamp = data[i]['timestamp'];
+    id = data[i]['id'];
+
+    anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
+    anchor.href = `/emails/${id}`;
+
+    document.querySelector('#emails-view').append(anchor);
+    document.querySelector('#emails-view').append(br);
   }
-  // Change color to gray if email has been read
+  // Change color to gray if read = true
   if(data[i]['read'] === true) {
     div.style.backgroundColor = "#DCDCDC";
   }
@@ -29,15 +39,19 @@ async function getSent() {
 
   // Show sent mail data
   for (let i = 0; i < data.length; i++) {
-    let div = document.createElement('div');
+    let anchor = document.createElement('a');
+    let br = document.createElement('br');
     
     sender = data[i]['sender'];
     subject = data[i]['subject'];
     timestamp = data[i]['timestamp'];
     id = data[i]['id'];
-    div.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
-    document.querySelector('#emails-view').append(div);
-    //`/emails/${data_id}`
+
+    anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
+    anchor.href = `/emails/${id}`;
+
+    document.querySelector('#emails-view').append(anchor);
+    document.querySelector('#emails-view').append(br);
   }
 };
 
@@ -55,6 +69,19 @@ async function getArchived() {
   }
 }
 
+async function getArchived() {
+  const response = await fetch(archivedURL);
+  const data = await response.json();
+
+  // Show archived mail data
+  for (let i = 0; i < data.length; i++) {
+    let li = document.createElement('li');
+    li.innerHTML = `${data[i]['sender']} | ${data[i]['subject']} -> ${data[i]['timestamp']}`;
+    document.querySelector('#emails-view').append(li);
+  }
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
   // Use buttons to toggle between views
   document.querySelector('#inbox').addEventListener('click', () => {
@@ -71,8 +98,19 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.querySelector('#compose').addEventListener('click', () => {
     compose_email();
-  }) 
+  });
+  document.querySelectorAll('a').addEventListener('click', () => {
+    read_email();
+  });
 });
+
+function read_email() {
+
+  //Show email and hide other views
+  document.querySelector('#email-view').style.display = 'block';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('emails-view').style.display = 'none';
+}
 
 function compose_email() {
 
@@ -95,6 +133,8 @@ function load_mailbox(mailbox) {
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 }
+
+
 
 // Submit Email Function
 document.addEventListener('DOMContentLoaded', () => {
