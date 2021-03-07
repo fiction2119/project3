@@ -11,6 +11,7 @@ async function getInbox() {
   for (let i = 0; i < data.length; i++) {
     let anchor = document.createElement('a');
     let br = document.createElement('br');
+    console.log(anchor);
 
     sender = data[i]['sender'];
     subject = data[i]['subject'];
@@ -29,9 +30,9 @@ async function getInbox() {
   }
   else {
     div.style.backgroundColor = "#FFFFFF";
-  };
+  };  
 };
-// Get sent mails json data 
+// Get sent mails' json data 
 async function getSent() {
   const response = await fetch(sentURL);
   const data = await response.json();
@@ -47,17 +48,27 @@ async function getSent() {
     id = data[i]['id'];
 
     anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
-    anchor.href = `/emails/${id}`;
+    anchor.href = "www.google.com"
     anchor.className = 'sentAnchors';
-
+    
+    anchor.addEventListener('click', anchorClick);
     document.querySelector('#emails-view').append(anchor);
     document.querySelector('#emails-view').append(br);
-
   };
+};
+// On anchor click, show mail content
+function anchorClick(e) {
+  
+  let div = document.createElement('div');
+  
+  div.innerHTML = e.target.innerHTML;
 
-  document.querySelectorAll('.sentAnchors').forEach(item => {
-    item.addEventListener('click', anchorClick);
-  });
+  view_email();
+  
+  document.querySelector('#email-view').append(div);
+  console.log("atum");
+  e.preventDefault();
+  return false;
 };
 // Get archived mails json data 
 async function getArchived() {
@@ -71,31 +82,35 @@ async function getArchived() {
     document.querySelector('#emails-view').append(li);
   };
 };
-
 // Compose email function
 function compose_email() {
   // Show compose view and hide other views
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+  console.log('composing...')
 };
 
 function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 };
 
 function view_email() {
   //Show email and hide other views
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#email-view').style.display = 'block';
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  
+  console.log('viewing email...');
 };
 
 // When dom is loaded, create click listeners
@@ -126,6 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const recipients = document.querySelector('#compose-recipients').value;
     const subject = document.querySelector('#compose-subject').value;
     const body = document.querySelector('#compose-body').value;
+
+    load_mailbox('sent');
     // Transform into json
     fetch('/emails', {
       method: 'POST',
@@ -137,11 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(response => response.json())
     .then(result => {
-      
       console.log(result);
     });
   };
-
-  load_mailbox('sent');
 });
-
