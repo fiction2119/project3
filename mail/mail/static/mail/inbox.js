@@ -32,7 +32,7 @@ async function getInbox() {
     div.style.backgroundColor = "#FFFFFF";
   };  
 };
-// Get sent mails' json data 
+// Get sent mails json data 
 async function getSent() {
   const response = await fetch(sentURL);
   const data = await response.json();
@@ -46,9 +46,9 @@ async function getSent() {
     subject = data[i]['subject'];
     timestamp = data[i]['timestamp'];
     id = data[i]['id'];
-
+    
     anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
-    anchor.href = "www.google.com"
+    anchor.href = `/emails/${id}`;
     anchor.className = 'sentAnchors';
     
     anchor.addEventListener('click', anchorClick);
@@ -58,18 +58,30 @@ async function getSent() {
 };
 // On anchor click, show mail content
 function anchorClick(e) {
-  
   let div = document.createElement('div');
-  
-  div.innerHTML = e.target.innerHTML;
 
+  document.querySelector('#email-view').append(div);
+
+  // Delete all previously opened emails from view
+  mailContent = document.querySelectorAll('.mailContent');
+  mailContent.forEach(element => element.innerHTML = "");
+  
+  div.className = 'mailContent';
   view_email();
   
-  document.querySelector('#email-view').append(div);
-  console.log("atum");
   e.preventDefault();
-  return false;
+
+  let href = this.getAttribute('href');
+
+  fetch(`${href}`)
+  .then(response => response.json())
+  .then(email => {
+    // Print email
+    div.append(`From: ${email['sender']}  To: ${email['recipients']} Subject: ${email['subject']} Timestamp: ${email['timestamp']}  ${email['body']}`);
+  });
 };
+
+
 // Get archived mails json data 
 async function getArchived() {
   const response = await fetch(archivedURL);
