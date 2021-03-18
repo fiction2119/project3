@@ -27,13 +27,12 @@ async function getInbox() {
 
     // Change color to gray if read = true
     if(data[i]['read'] === true) {
-    div.style.backgroundColor = "#DCDCDC";
+      anchor.style.backgroundColor = "#DCDCDC";
     }
     else {
-      div.style.backgroundColor = "#FFFFFF";
+      anchor.style.backgroundColor = "#FFFFFF";
     };  
   };
-  
 };
 // Get sent mails json data 
 async function getSent() {
@@ -105,30 +104,6 @@ async function getArchived() {
   };
 };
 
-function getCompose() {
-  document.querySelector('#compose-form').onsubmit = function() {
-    // Get values provided by user
-    const recipients = document.querySelector('#compose-recipients').value;
-    const subject = document.querySelector('#compose-subject').value;
-    const body = document.querySelector('#compose-body').value;
-
-    load_mailbox('sent');
-    // Transform into json
-    fetch('/emails', {
-      method: 'POST',
-      body: JSON.stringify({
-          recipients: recipients,
-          subject: subject,
-          body: body
-      })
-    })
-    .then(response => response.json())
-    .then(result => {
-      console.log(result);
-    });
-  };
-};
-
 // Compose email function
 function compose_email() {
   // Show compose view and hide other views
@@ -176,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
     load_mailbox('archived');
   });
   document.querySelector('#compose').addEventListener('click', () => {
-    getCompose();
     compose_email();
   });
 });
@@ -184,5 +158,28 @@ document.addEventListener('DOMContentLoaded', function() {
 // Submit Email Function
 document.addEventListener('DOMContentLoaded', () => {
   // Upon click, submit email
-  
+  document.querySelector('#compose-form').onsubmit = function() {
+    // Get values provided by user
+    const recipients = document.querySelector('#compose-recipients').value;
+    const subject = document.querySelector('#compose-subject').value;
+    const body = document.querySelector('#compose-body').value;
+
+    console.log(recipients);
+    console.log(subject);
+    console.log(body);
+    load_mailbox('sent');
+    // Transform into json
+    fetch('/emails', {
+      method: 'POST',
+      body: JSON.stringify({
+          recipients: recipients,
+          subject: subject,
+          body: body
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log(result);
+    });
+  };
 });
