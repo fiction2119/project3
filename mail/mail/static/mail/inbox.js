@@ -21,16 +21,19 @@ async function getInbox() {
     anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
     anchor.href = `/emails/${id}`;
 
+    anchor.addEventListener('click', anchorClick);
     document.querySelector('#emails-view').append(anchor);
     document.querySelector('#emails-view').append(br);
-  };
-  // Change color to gray if read = true
-  if(data[i]['read'] === true) {
+
+    // Change color to gray if read = true
+    if(data[i]['read'] === true) {
     div.style.backgroundColor = "#DCDCDC";
-  }
-  else {
-    div.style.backgroundColor = "#FFFFFF";
-  };  
+    }
+    else {
+      div.style.backgroundColor = "#FFFFFF";
+    };  
+  };
+  
 };
 // Get sent mails json data 
 async function getSent() {
@@ -59,6 +62,8 @@ async function getSent() {
 // On anchor click, show mail content
 function anchorClick(e) {
   let div = document.createElement('div');
+  let br = document.createElement('br');
+  let hr = document.createElement('hr');
 
   document.querySelector('#email-view').append(div);
 
@@ -77,10 +82,15 @@ function anchorClick(e) {
   .then(response => response.json())
   .then(email => {
     // Print email
-    div.append(`From: ${email['sender']}  To: ${email['recipients']} Subject: ${email['subject']} Timestamp: ${email['timestamp']}  ${email['body']}`);
+    div.append(`${email['subject']} // `);
+    div.append(`From: ${email['sender']}`);
+    div.append(br)
+    div.append(` To: ${email['recipients']}`);
+    div.append(` // ${email['timestamp']}`);
+    div.append(hr);
+    div.append(`${email['body']}`);
   });
 };
-
 
 // Get archived mails json data 
 async function getArchived() {
@@ -94,6 +104,31 @@ async function getArchived() {
     document.querySelector('#emails-view').append(li);
   };
 };
+
+function getCompose() {
+  document.querySelector('#compose-form').onsubmit = function() {
+    // Get values provided by user
+    const recipients = document.querySelector('#compose-recipients').value;
+    const subject = document.querySelector('#compose-subject').value;
+    const body = document.querySelector('#compose-body').value;
+
+    load_mailbox('sent');
+    // Transform into json
+    fetch('/emails', {
+      method: 'POST',
+      body: JSON.stringify({
+          recipients: recipients,
+          subject: subject,
+          body: body
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log(result);
+    });
+  };
+};
+
 // Compose email function
 function compose_email() {
   // Show compose view and hide other views
@@ -129,18 +164,19 @@ function view_email() {
 document.addEventListener('DOMContentLoaded', function() {
   // Use buttons to toggle between views
   document.querySelector('#inbox').addEventListener('click', () => {
-    load_mailbox('inbox');
     getInbox();
+    load_mailbox('inbox');
   });
   document.querySelector('#sent').addEventListener('click', () => {
-    load_mailbox('sent');
     getSent();
+    load_mailbox('sent');
   });
   document.querySelector('#archived').addEventListener('click', () => {
-    load_mailbox('archived');
     getArchived();
+    load_mailbox('archived');
   });
   document.querySelector('#compose').addEventListener('click', () => {
+    getCompose();
     compose_email();
   });
 });
@@ -148,25 +184,5 @@ document.addEventListener('DOMContentLoaded', function() {
 // Submit Email Function
 document.addEventListener('DOMContentLoaded', () => {
   // Upon click, submit email
-  document.querySelector('#compose-form').onsubmit = function() {
-    // Get values provided by user
-    const recipients = document.querySelector('#compose-recipients').value;
-    const subject = document.querySelector('#compose-subject').value;
-    const body = document.querySelector('#compose-body').value;
-
-    load_mailbox('sent');
-    // Transform into json
-    fetch('/emails', {
-      method: 'POST',
-      body: JSON.stringify({
-          recipients: recipients,
-          subject: subject,
-          body: body
-      })
-    })
-    .then(response => response.json())
-    .then(result => {
-      console.log(result);
-    });
-  };
+  
 });
