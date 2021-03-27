@@ -11,7 +11,7 @@ async function getInbox() {
   for (let i = 0; i < data.length; i++) {
     let anchor = document.createElement('a');
     let br = document.createElement('br');
-    console.log(anchor);
+    
 
     sender = data[i]['sender'];
     subject = data[i]['subject'];
@@ -31,7 +31,7 @@ async function getInbox() {
     }
     else {
       anchor.style.backgroundColor = "#FFFFFF";
-    };  
+    };
   };
 };
 // Get sent mails json data 
@@ -48,10 +48,18 @@ async function getSent() {
     subject = data[i]['subject'];
     timestamp = data[i]['timestamp'];
     id = data[i]['id'];
-    
+    console.log(data[i]['read']);
+
     anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
     anchor.href = `/emails/${id}`;
     anchor.className = 'sentAnchors';
+
+    if(data[i]['read'] === true) {
+      anchor.style.backgroundColor = "#DCDCDC";
+    }
+    else {
+      anchor.style.backgroundColor = "#FFFFFF";
+    };
     
     anchor.addEventListener('click', anchorClick);
     document.querySelector('#emails-view').append(anchor);
@@ -66,16 +74,18 @@ function anchorClick(e) {
 
   document.querySelector('#email-view').append(div);
 
+  div.className = 'mailContent';
+
   // Delete all previously opened emails from view
   mailContent = document.querySelectorAll('.mailContent');
   mailContent.forEach(element => element.innerHTML = "");
-  
-  div.className = 'mailContent';
+
   view_email();
-  
   e.preventDefault();
 
   let href = this.getAttribute('href');
+
+  
 
   fetch(`${href}`)
   .then(response => response.json())
@@ -163,10 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const recipients = document.querySelector('#compose-recipients').value;
     const subject = document.querySelector('#compose-subject').value;
     const body = document.querySelector('#compose-body').value;
-
-    console.log(recipients);
-    console.log(subject);
-    console.log(body);
+    
     load_mailbox('sent');
     // Transform into json
     fetch('/emails', {
@@ -174,11 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify({
           recipients: recipients,
           subject: subject,
-          body: body
+          body: body,
       })
     })
     .then(response => response.json())
     .then(result => {
+      console.log(response);
       console.log(result);
     });
   };
