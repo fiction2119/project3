@@ -17,21 +17,16 @@ async function getInbox() {
     subject = data[i]['subject'];
     timestamp = data[i]['timestamp'];
     id = data[i]['id'];
-
+    
     anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
     anchor.href = `/emails/${id}`;
 
     anchor.addEventListener('click', anchorClick);
+    
     document.querySelector('#emails-view').append(anchor);
     document.querySelector('#emails-view').append(br);
-
-    // Change color to gray if read = true
-    if(data[i]['read'] === true) {
-      anchor.style.backgroundColor = "#DCDCDC";
-    }
-    else {
-      anchor.style.backgroundColor = "#FFFFFF";
-    };
+    
+    
   };
 };
 // Get sent mails json data 
@@ -48,44 +43,66 @@ async function getSent() {
     subject = data[i]['subject'];
     timestamp = data[i]['timestamp'];
     id = data[i]['id'];
-    console.log(data[i]['read']);
-
+    
     anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
     anchor.href = `/emails/${id}`;
     anchor.className = 'sentAnchors';
-
-    if(data[i]['read'] === true) {
-      anchor.style.backgroundColor = "#DCDCDC";
-    }
-    else {
-      anchor.style.backgroundColor = "#FFFFFF";
-    };
     
     anchor.addEventListener('click', anchorClick);
     document.querySelector('#emails-view').append(anchor);
     document.querySelector('#emails-view').append(br);
   };
 };
+
+// Get archived mails json data 
+async function getArchived() {
+  const response = await fetch(inboxURL);
+  const data = await response.json();
+
+  for (let i = 0; i < data.length; i++)
+  {
+    if(data[i]['archived'] = true) {
+      let anchor = document.createElement('a');
+      let br = document.createElement('br');
+
+      sender = data[i]['sender'];
+      subject = data[i]['subject'];
+      timestamp = data[i]['timestamp'];
+      id = data[i]['id'];
+
+      anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
+      anchor.href = `/emails/${id}`;
+      anchor.className = 'sentAnchors';
+
+      anchor.addEventListener('click', anchorClick);
+      document.querySelector('#emails-view').append(anchor);
+      document.querySelector('#emails-view').append(br);
+    }
+  }
+};
+
 // On anchor click, show mail content
 function anchorClick(e) {
+  // Create instances of the following elements
   let div = document.createElement('div');
   let br = document.createElement('br');
   let hr = document.createElement('hr');
+  let btn = document.createElement('button');
 
+  // Append the empty div to the #email-view
   document.querySelector('#email-view').append(div);
 
-  div.className = 'mailContent';
-
   // Delete all previously opened emails from view
+  div.className = 'mailContent';
   mailContent = document.querySelectorAll('.mailContent');
   mailContent.forEach(element => element.innerHTML = "");
 
+  // Show email-view and prevent default behaviour
   view_email();
   e.preventDefault();
 
+  // Get the href of this object
   let href = this.getAttribute('href');
-
-  
 
   fetch(`${href}`)
   .then(response => response.json())
@@ -99,20 +116,17 @@ function anchorClick(e) {
     div.append(hr);
     div.append(`${email['body']}`);
   });
+  // On button click, run function with href as arg
+  btn.addEventListener('click', btnClick);
+  div.append(btn);
 };
 
-// Get archived mails json data 
-async function getArchived() {
-  const response = await fetch(archivedURL);
-  const data = await response.json();
+function btnClick(e) {
+  console.log(e.target.href);
+  console.log(this.getAttribute('href'));
+}
 
-  // Show archived mail data
-  for (let i = 0; i < data.length; i++) {
-    let li = document.createElement('li');
-    li.innerHTML = `${data[i]['sender']} | ${data[i]['subject']} -> ${data[i]['timestamp']}`;
-    document.querySelector('#emails-view').append(li);
-  };
-};
+
 
 // Compose email function
 function compose_email() {
@@ -124,7 +138,6 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
-  console.log('composing...')
 };
 
 function load_mailbox(mailbox) {
@@ -141,8 +154,6 @@ function view_email() {
   document.querySelector('#email-view').style.display = 'block';
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
-  
-  console.log('viewing email...');
 };
 
 // When dom is loaded, create click listeners
@@ -186,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(response => response.json())
     .then(result => {
-      console.log(response);
       console.log(result);
     });
   };
