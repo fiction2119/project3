@@ -89,6 +89,18 @@ function anchorClick(e) {
   let hr = document.createElement('hr');
   let btn = document.createElement('button');
 
+  // Customize div element
+  div.style.height = '400px';
+
+  // Customize button element
+  btn.className = 'btn btn-sm btn-outline-primary';
+  btn.style.padding = '3px 6px';
+  btn.style.fontSize = '9px';
+  btn.style.position = 'absolute';
+  btn.style.top = '110px';
+  btn.style.left = '770px';
+  btn.innerHTML = 'Archive';
+
   // Append the empty div to the #email-view
   document.querySelector('#email-view').append(div);
 
@@ -115,18 +127,35 @@ function anchorClick(e) {
     div.append(` // ${email['timestamp']}`);
     div.append(hr);
     div.append(`${email['body']}`);
+    
+    btn.addEventListener('click', function() {
+      if (email['archived'] = false) {
+        console.log(`${email['archived']} (1)`);
+        fetch(`${href}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+              archived: true
+          })
+        })
+        console.log(`${email['archived']} (2)`);
+      };
+
+      if (email['archived'] = true) {
+        console.log(`${href}`);
+        console.log(`${email['archived']} (3)`);
+        fetch(`${href}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+              archived: false
+          })
+        })
+        console.log(`${email['archived']} (4)`);
+      };
+      console.log(`${email['archived']} (5)`);
+    });
   });
-  // On button click, run function with href as arg
-  btn.addEventListener('click', btnClick);
   div.append(btn);
 };
-
-function btnClick(e) {
-  console.log(e.target.href);
-  console.log(this.getAttribute('href'));
-}
-
-
 
 // Compose email function
 function compose_email() {
