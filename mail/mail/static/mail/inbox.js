@@ -127,9 +127,11 @@ function anchorClick(e) {
     div.append(` // ${email['timestamp']}`);
     div.append(hr);
     div.append(`${email['body']}`);
+    div.append(btn);
     
-    btn.addEventListener('click', function() {
-      if (email['archived'] = false) {
+    btn.addEventListener('click', archive(email, href));
+
+      /*if (email['archived'] = false) {
         console.log(`${email['archived']} (1)`);
         fetch(`${href}`, {
           method: 'PUT',
@@ -138,9 +140,8 @@ function anchorClick(e) {
           })
         })
         console.log(`${email['archived']} (2)`);
-      };
-
-      if (email['archived'] = true) {
+      }
+      else if (email['archived'] = true) {
         console.log(`${href}`);
         console.log(`${email['archived']} (3)`);
         fetch(`${href}`, {
@@ -150,12 +151,36 @@ function anchorClick(e) {
           })
         })
         console.log(`${email['archived']} (4)`);
-      };
-      console.log(`${email['archived']} (5)`);
+      };*/
     });
-  });
-  div.append(btn);
+    
 };
+
+async function archive(email, href) {
+  console.log(email);
+  console.log(href);
+
+   if (email['archived'] = false) {
+    console.log(`THEN: ${email['archived']} (1)`);
+    fetch(`${href}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+          archived: true
+      })
+    })
+    console.log(`NOW: ${email['archived']} (2)`);
+   }
+   else {
+    console.log(`THEN: ${email['archived']} (3)`);
+    fetch(`${href}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+          archived: false
+      })
+    })
+    console.log(`NOW: ${email['archived']} (4)`);
+   }
+}
 
 // Compose email function
 function compose_email() {
