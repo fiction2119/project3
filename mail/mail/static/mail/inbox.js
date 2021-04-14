@@ -77,12 +77,16 @@ async function getArchived() {
       anchor.addEventListener('click', anchorClick);
       document.querySelector('#emails-view').append(anchor);
       document.querySelector('#emails-view').append(br);
-    }
-  }
+    };
+  };
 };
 
 // On anchor click, show mail content
 function anchorClick(e) {
+
+  // Get href of this object
+  let href = this.getAttribute('href');
+
   // Create instances of the following elements
   let div = document.createElement('div');
   let br = document.createElement('br');
@@ -113,13 +117,11 @@ function anchorClick(e) {
   view_email();
   e.preventDefault();
 
-  // Get the href of this object
-  let href = this.getAttribute('href');
-
   fetch(`${href}`)
   .then(response => response.json())
   .then(email => {
-    // Print email
+    // Clear div and append to it the content below
+    div.innerText = "";
     div.append(`${email['subject']} // `);
     div.append(`From: ${email['sender']}`);
     div.append(br)
@@ -127,59 +129,32 @@ function anchorClick(e) {
     div.append(` // ${email['timestamp']}`);
     div.append(hr);
     div.append(`${email['body']}`);
-    div.append(btn);
-    
-    btn.addEventListener('click', archive(email, href));
 
-      /*if (email['archived'] = false) {
-        console.log(`${email['archived']} (1)`);
-        fetch(`${href}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-              archived: true
-          })
-        })
-        console.log(`${email['archived']} (2)`);
-      }
-      else if (email['archived'] = true) {
-        console.log(`${href}`);
-        console.log(`${email['archived']} (3)`);
-        fetch(`${href}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-              archived: false
-          })
-        })
-        console.log(`${email['archived']} (4)`);
-      };*/
-    });
-    
+    archived = `${email['archived']}`;
+    // Add EventListener to archive button
+    btn.addEventListener('click', archive(href, archived));
+    div.append(btn);    
+  })
 };
 
-async function archive(email, href) {
-  console.log(email);
-  console.log(href);
+function archive(href, archived) {
 
-   if (email['archived'] = false) {
-    console.log(`THEN: ${email['archived']} (1)`);
+  if (archived = true) {
     fetch(`${href}`, {
       method: 'PUT',
       body: JSON.stringify({
           archived: true
       })
     })
-    console.log(`NOW: ${email['archived']} (2)`);
-   }
-   else {
-    console.log(`THEN: ${email['archived']} (3)`);
+  }
+  else if (archived = false) {
     fetch(`${href}`, {
       method: 'PUT',
       body: JSON.stringify({
-          archived: false
+          archived: true
       })
     })
-    console.log(`NOW: ${email['archived']} (4)`);
-   }
+  }
 }
 
 // Compose email function
