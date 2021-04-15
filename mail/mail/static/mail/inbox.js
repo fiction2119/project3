@@ -103,7 +103,6 @@ function anchorClick(e) {
   btn.style.position = 'absolute';
   btn.style.top = '110px';
   btn.style.left = '770px';
-  btn.innerHTML = 'Archive';
 
   // Append the empty div to the #email-view
   document.querySelector('#email-view').append(div);
@@ -129,33 +128,42 @@ function anchorClick(e) {
     div.append(` // ${email['timestamp']}`);
     div.append(hr);
     div.append(`${email['body']}`);
+    div.append(btn);
 
-    archived = `${email['archived']}`;
-    // Add EventListener to archive button
-    btn.addEventListener('click', archive(href, archived));
-    div.append(btn);    
+    return email['archived'];
   })
+  // try to put this into a separate function
+  .then(archived => {
+    if(archived = true) {
+      btn.innerHTML = 'Unarchive';
+      btn.addEventListener('click', unarchive(href));
+      console.log('Changing from true to false...')
+      fetch(`${href}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            archived: false
+        })
+      });
+    }
+    else {
+      btn.innerHTML = 'Archive';
+      console.log('Changing from false to true...')
+      fetch(`${href}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+        archived: true
+        })
+      });
+    };
+  });
 };
 
-function archive(href, archived) {
 
-  if (archived = true) {
-    fetch(`${href}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-          archived: true
-      })
-    })
-  }
-  else if (archived = false) {
-    fetch(`${href}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-          archived: true
-      })
-    })
-  }
+function unarchive(href) {
+  
 }
+
+
 
 // Compose email function
 function compose_email() {
