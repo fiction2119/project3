@@ -11,7 +11,6 @@ async function getInbox() {
   for (let i = 0; i < data.length; i++) {
     let anchor = document.createElement('a');
     let br = document.createElement('br');
-    
 
     sender = data[i]['sender'];
     subject = data[i]['subject'];
@@ -25,8 +24,6 @@ async function getInbox() {
     
     document.querySelector('#emails-view').append(anchor);
     document.querySelector('#emails-view').append(br);
-    
-    
   };
 };
 // Get sent mails json data 
@@ -91,26 +88,23 @@ function anchorClick(e) {
   let div = document.createElement('div');
   let br = document.createElement('br');
   let hr = document.createElement('hr');
-  let btn = document.createElement('button');
+  let archiveBtn = document.createElement('button');
+  let replyBtn = document.createElement('button');
 
-  // Customize div element
-  div.style.height = '400px';
+  // Customize the following elements
+  customize(div, archiveBtn, replyBtn);
 
-  // Customize button element
-  btn.className = 'btn btn-sm btn-outline-primary';
-  btn.style.padding = '3px 6px';
-  btn.style.fontSize = '9px';
-  btn.style.position = 'absolute';
-  btn.style.top = '110px';
-  btn.style.left = '770px';
+  replyBtn.addEventListener('click', () => {
+    compose_email();
+  });
+
+  
+
+  // Delete all previously opened emails from view
+  document.querySelector('#email-view').innerHTML = "";
 
   // Append the empty div to the #email-view
   document.querySelector('#email-view').append(div);
-
-  // Delete all previously opened emails from view
-  div.className = 'mailContent';
-  mailContent = document.querySelectorAll('.mailContent');
-  mailContent.forEach(element => element.innerHTML = "");
 
   // Show email-view and prevent default behaviour
   view_email();
@@ -119,8 +113,7 @@ function anchorClick(e) {
   fetch(`${href}`)
   .then(response => response.json())
   .then(email => {
-    // Clear div and append to it the content below
-    div.innerText = "";
+    // Append to div the content below
     div.append(`${email['subject']} // `);
     div.append(`From: ${email['sender']}`);
     div.append(br)
@@ -128,42 +121,40 @@ function anchorClick(e) {
     div.append(` // ${email['timestamp']}`);
     div.append(hr);
     div.append(`${email['body']}`);
-    div.append(btn);
-
-    return email['archived'];
-  })
-  // try to put this into a separate function
-  .then(archived => {
-    if(archived = true) {
+    div.append(archiveBtn);
+    div.append(replyBtn);
+    
+    // TODO 
+    /*if (email['archived'] == true) {
       btn.innerHTML = 'Unarchive';
       btn.addEventListener('click', unarchive(href));
-      console.log('Changing from true to false...')
-      fetch(`${href}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-            archived: false
-        })
-      });
     }
     else {
       btn.innerHTML = 'Archive';
-      console.log('Changing from false to true...')
-      fetch(`${href}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-        archived: true
-        })
-      });
-    };
+      btn.addEventListener('click', archive(href));
+    };*/
   });
 };
 
+/*function archive(href) {
+  console.log('From unarchive to archive....');
+  fetch(`${href}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: true
+    })
+  });
+};
 
 function unarchive(href) {
-  
-}
-
-
+  console.log('From archive to unarchive....');
+  fetch(`${href}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: false
+    })
+  });
+};*/
 
 // Compose email function
 function compose_email() {
@@ -238,3 +229,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 });
+
+// Customize the following elements
+function customize(div, archiveBtn, replyBtn) {
+
+  // div
+  div.style.height = '400px';
+
+  // archiveBtn
+  archiveBtn.className = 'btn btn-sm btn-outline-primary';
+  archiveBtn.style.padding = '3px 6px';
+  archiveBtn.style.fontSize = '9px';
+  archiveBtn.style.position = 'absolute';
+  archiveBtn.style.top = '110px';
+  archiveBtn.style.left = '770px';
+  archiveBtn.innerHTML = 'Archive';
+
+  // replyBtn
+  replyBtn.className = 'btn btn-sm btn-outline-primary';
+  replyBtn.style.padding = '3px 6px';
+  replyBtn.style.fontSize = '9px';
+  replyBtn.style.position = 'absolute';
+  replyBtn.style.top = '135px';
+  replyBtn.style.left = '770px';
+  replyBtn.innerHTML = 'Reply';
+};
