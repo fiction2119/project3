@@ -94,12 +94,6 @@ function anchorClick(e) {
   // Customize the following elements
   customize(div, archiveBtn, replyBtn);
 
-  replyBtn.addEventListener('click', () => {
-    compose_email();
-  });
-
-  
-
   // Delete all previously opened emails from view
   document.querySelector('#email-view').innerHTML = "";
 
@@ -134,6 +128,10 @@ function anchorClick(e) {
       btn.addEventListener('click', archive(href));
     };*/
   });
+
+  replyBtn.addEventListener('click', () => {
+    reply_email(subject);
+  });
 };
 
 /*function archive(href) {
@@ -158,6 +156,18 @@ function unarchive(href) {
 
 // Compose email function
 function compose_email() {
+  // Show compose view and hide other views
+  document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+  // Clear out composition fields
+  document.querySelector('#compose-recipients').value = '';
+  document.querySelector('#compose-subject').value = '';
+  document.querySelector('#compose-body').value = '';
+};
+
+// Compose email function
+function reply_email() {
   // Show compose view and hide other views
   document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#emails-view').style.display = 'none';
