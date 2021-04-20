@@ -78,81 +78,6 @@ async function getArchived() {
   };
 };
 
-// On anchor click, show mail content
-function anchorClick(e) {
-
-  // Get href of this object
-  let href = this.getAttribute('href');
-
-  // Create instances of the following elements
-  let div = document.createElement('div');
-  let br = document.createElement('br');
-  let hr = document.createElement('hr');
-  let archiveBtn = document.createElement('button');
-  let replyBtn = document.createElement('button');
-
-  // Customize the following elements
-  customize(div, archiveBtn, replyBtn);
-
-  // Delete all previously opened emails from view
-  document.querySelector('#email-view').innerHTML = "";
-
-  // Append the empty div to the #email-view
-  document.querySelector('#email-view').append(div);
-
-  // Show email-view and prevent default behaviour
-  view_email();
-  e.preventDefault();
-
-  fetch(`${href}`)
-  .then(response => response.json())
-  .then(email => {
-    // Append to div the content below
-    div.append(`${email['subject']} // `);
-    div.append(`From: ${email['sender']}`);
-    div.append(br)
-    div.append(` To: ${email['recipients']}`);
-    div.append(` // ${email['timestamp']}`);
-    div.append(hr);
-    div.append(`${email['body']}`);
-    div.append(archiveBtn);
-    div.append(replyBtn);
-    
-    // TODO 
-    /*if (email['archived'] == true) {
-      btn.innerHTML = 'Unarchive';
-      btn.addEventListener('click', unarchive(href));
-    }
-    else {
-      btn.innerHTML = 'Archive';
-      btn.addEventListener('click', archive(href));
-    };*/
-  });
-
-  replyBtn.addEventListener('click', () => {
-    reply_email(subject);
-  });
-};
-
-/*function archive(href) {
-  console.log('From unarchive to archive....');
-  fetch(`${href}`, {
-    method: 'PUT',
-    body: JSON.stringify({
-        archived: true
-    })
-  });
-};
-
-function unarchive(href) {
-  console.log('From archive to unarchive....');
-  fetch(`${href}`, {
-    method: 'PUT',
-    body: JSON.stringify({
-        archived: false
-    })
-  });
-};*/
 
 // Compose email function
 function compose_email() {
@@ -166,16 +91,17 @@ function compose_email() {
   document.querySelector('#compose-body').value = '';
 };
 
-// Compose email function
-function reply_email() {
+// Reply email function
+function reply_email(recipients, subject, body, timestamp) {
   // Show compose view and hide other views
   document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+
   // Clear out composition fields
-  document.querySelector('#compose-recipients').value = '';
-  document.querySelector('#compose-subject').value = '';
-  document.querySelector('#compose-body').value = '';
+  document.querySelector('#compose-recipients').value = recipients;
+  document.querySelector('#compose-subject').value = `Re: ${subject}`;
+  document.querySelector('#compose-body').value = `On ${timestamp}, ${recipients} wrote: ${body}`;
 };
 
 function load_mailbox(mailbox) {
@@ -240,6 +166,85 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 });
 
+// On anchor click, show mail content
+function anchorClick(e) {
+
+  // Get href of this object
+  let href = this.getAttribute('href');
+
+  // Create instances of the following elements
+  let div = document.createElement('div');
+  let br = document.createElement('br');
+  let hr = document.createElement('hr');
+  let archiveBtn = document.createElement('button');
+  let replyBtn = document.createElement('button');
+
+  // Customize the following elements
+  customize(div, archiveBtn, replyBtn);
+
+  // Delete all previously opened emails from view and append div to it
+  document.querySelector('#email-view').innerHTML = "";
+  document.querySelector('#email-view').append(div);
+
+  // Show email-view and prevent default behaviour
+  view_email();
+  e.preventDefault();
+
+  fetch(`${href}`)
+  .then(response => response.json())
+  .then(email => {
+    // Append to div the content below
+    div.append(`${email['subject']} // `);
+    div.append(`From: ${email['sender']}`);
+    div.append(br)
+    div.append(` To: ${email['recipients']}`);
+    div.append(` // ${email['timestamp']}`);
+    div.append(hr);
+    div.append(`${email['body']}`);
+    div.append(archiveBtn);
+    div.append(replyBtn);
+    
+    return email;
+    
+  })
+  .then(email => {
+    replyBtn.addEventListener('click', () => {
+      reply_email(email['recipients'], email['subject'], email['body']), String(email['timestamp']);
+    });
+    return email;
+  })
+  .then(email => {
+    if (email['archived'] == true) {
+      archiveBtn.innerHTML = 'Unarchive';
+      archiveBtn.addEventListener('click', unarchive(href));
+    }
+    else {
+      archiveBtn.innerHTML = 'Archive';
+      archiveBtn.addEventListener('click', archive(href));
+    };
+  });
+};
+
+function archive(href) {
+  console.log('From unarchive to archive....');
+  fetch(`${href}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: true
+    })
+  });
+};
+
+function unarchive(href) {
+  console.log('From archive to unarchive....');
+  fetch(`${href}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: false
+    })
+  });
+};
+
 // Customize the following elements
 function customize(div, archiveBtn, replyBtn) {
 
@@ -253,7 +258,6 @@ function customize(div, archiveBtn, replyBtn) {
   archiveBtn.style.position = 'absolute';
   archiveBtn.style.top = '110px';
   archiveBtn.style.left = '770px';
-  archiveBtn.innerHTML = 'Archive';
 
   // replyBtn
   replyBtn.className = 'btn btn-sm btn-outline-primary';
@@ -264,3 +268,4 @@ function customize(div, archiveBtn, replyBtn) {
   replyBtn.style.left = '770px';
   replyBtn.innerHTML = 'Reply';
 };
+
