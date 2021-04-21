@@ -166,31 +166,48 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 });
 
-// On anchor click, show mail content
+// on anchor click, show mail content
 function anchorClick(e) {
 
-  // Get href of this object
+  // get href of this object
   let href = this.getAttribute('href');
 
-  // Create instances of the following elements
+  // create instances of the following elements
   let div = document.createElement('div');
-  let br = document.createElement('br');
-  let hr = document.createElement('hr');
   let archiveBtn = document.createElement('button');
   let replyBtn = document.createElement('button');
 
-  // Customize the following elements
-  customize(div, archiveBtn, replyBtn);
+  // customize following elements
+  // div
+  div.style.height = '400px';
+
+  // archiveBtn
+  archiveBtn.className = 'btn btn-sm btn-outline-primary';
+  archiveBtn.style.padding = '3px 6px';
+  archiveBtn.style.fontSize = '9px';
+  archiveBtn.style.position = 'absolute';
+  archiveBtn.style.top = '110px';
+  archiveBtn.style.left = '770px';
+
+  // replyBtn
+  replyBtn.className = 'btn btn-sm btn-outline-primary';
+  replyBtn.style.padding = '3px 6px';
+  replyBtn.style.fontSize = '9px';
+  replyBtn.style.position = 'absolute';
+  replyBtn.style.top = '135px';
+  replyBtn.style.left = '770px';
+  replyBtn.innerHTML = 'Reply';
 
   // Delete all previously opened emails from view and append div to it
   document.querySelector('#email-view').innerHTML = "";
   document.querySelector('#email-view').append(div);
 
-  // Show email-view and prevent default behaviour
+  // add content to email-view and show it
+  append_content(href, div, archiveBtn, replyBtn);
   view_email();
   e.preventDefault();
 
-  fetch(`${href}`)
+  /* fetch(`${href}`)
   .then(response => response.json())
   .then(email => {
     // Append to div the content below
@@ -214,58 +231,104 @@ function anchorClick(e) {
     return email;
   })
   .then(email => {
-    if (email['archived'] == true) {
-      archiveBtn.innerHTML = 'Unarchive';
-      archiveBtn.addEventListener('click', unarchive(href));
-    }
-    else {
-      archiveBtn.innerHTML = 'Archive';
-      archiveBtn.addEventListener('click', archive(href));
-    };
-  });
+    
+  });*/
 };
 
-function archive(href) {
-  console.log('From unarchive to archive....');
-  fetch(`${href}`, {
+async function append_content(href, div, button1, button2) {
+  const response = await fetch(href);
+  const data = await response.json();
+
+  let br = document.createElement('br');
+  let hr = document.createElement('hr');
+  
+  div.append(`${data['subject']} // `);
+  div.append(`From: ${data['sender']}`);
+  div.append(br)
+  div.append(` To: ${data['recipients']}`);
+  div.append(` // ${data['timestamp']}`);
+  div.append(hr);
+  div.append(`${data['body']}`);
+
+  div.append(button1);
+  div.append(button2);
+  button1.id = 'archiveBtn';
+console.log("data",data);
+
+  if (data['archived'] == true) {
+    button1.innerHTML = 'Unarchive';
+    button1.addEventListener('click', function(){archiveOrUnarchive(href, button1);});
+  }
+  else {
+    button1.innerHTML = 'Archive';
+    button1.addEventListener('click', function(){archiveOrUnarchive(href, button1);});
+  };
+};
+
+async function archive(href, button) {
+  console.log('From unarchive to archive...')
+  const response = await fetch(href, {
     method: 'PUT',
     body: JSON.stringify({
         archived: true
     })
   });
+  console.log("status", response.status);
+  
+  if(response.status == 204)
+  {
+    button.innerText = "Unarchive";
+    
+  }
 };
 
-function unarchive(href) {
-  console.log('From archive to unarchive....');
-  fetch(`${href}`, {
+async function unarchive(href, button) {
+  console.log('From archive to unarchive...')
+  //disable
+  const response = await fetch(href, {
     method: 'PUT',
     body: JSON.stringify({
         archived: false
     })
   });
+
+  //.then -> enable mudava nome.
+  console.log("status", response.status);
+  if(response.status == 204)
+  {
+    button.innerText = "Archive";
+  }
 };
 
-// Customize the following elements
-function customize(div, archiveBtn, replyBtn) {
-
-  // div
-  div.style.height = '400px';
-
-  // archiveBtn
-  archiveBtn.className = 'btn btn-sm btn-outline-primary';
-  archiveBtn.style.padding = '3px 6px';
-  archiveBtn.style.fontSize = '9px';
-  archiveBtn.style.position = 'absolute';
-  archiveBtn.style.top = '110px';
-  archiveBtn.style.left = '770px';
-
-  // replyBtn
-  replyBtn.className = 'btn btn-sm btn-outline-primary';
-  replyBtn.style.padding = '3px 6px';
-  replyBtn.style.fontSize = '9px';
-  replyBtn.style.position = 'absolute';
-  replyBtn.style.top = '135px';
-  replyBtn.style.left = '770px';
-  replyBtn.innerHTML = 'Reply';
-};
-
+async function archiveOrUnarchive(href, button){
+  if(button.innerText == "Archive"){
+    console.log('From unarchive to archive...')
+    const response = await fetch(href, {
+      method: 'PUT',
+      body: JSON.stringify({
+          archived: true
+      })
+    });  
+    if(response.status == 204)
+    {
+      button.innerText = "Unarchive";
+    }
+  }
+  else
+  {
+    console.log('From archive to unarchive...')
+    //disable ao butao -> button.disabled = true.
+    const response = await fetch(href, {
+      method: 'PUT',
+      body: JSON.stringify({
+          archived: false
+      })
+    });
+    //.then -> enable mudar nome.
+    if(response.status == 204)
+    {
+      button.innerText = "Archive";
+    }
+    //else -> mesagem erro, se quiseres
+  }
+}
