@@ -2,11 +2,11 @@ const inboxURL = '/emails/inbox';
 const sentURL = '/emails/sent';
 const archivedURL = '/emails/archived'; 
 
-// Get inbox json data 
+// Get inbox json data
 async function getInbox() {
   const response = await fetch(inboxURL);
   const data = await response.json();
-
+  console.log(data);
   // Show inbox mail data
   for (let i = 0; i < data.length; i++) {
     let anchor = document.createElement('a');
@@ -16,6 +16,14 @@ async function getInbox() {
     subject = data[i]['subject'];
     timestamp = data[i]['timestamp'];
     id = data[i]['id'];
+    read = data[i]['read'];
+    
+    if(data[i]['read'] = false) {
+      anchor.style.backgroundColor = '#D3D3D3';
+    }
+    else {
+      anchor.style.backgroundColor = '#FFFFFF';
+    };
     
     anchor.innerHTML = `${sender} | ${subject} -> ${timestamp}`;
     anchor.href = `/emails/${id}`;
@@ -30,7 +38,7 @@ async function getInbox() {
 async function getSent() {
   const response = await fetch(sentURL);
   const data = await response.json();
-
+  console.log(data);
   // Show sent mail data
   for (let i = 0; i < data.length; i++) {
     let anchor = document.createElement('a');
@@ -53,8 +61,9 @@ async function getSent() {
 
 // Get archived mails json data 
 async function getArchived() {
-  const response = await fetch(inboxURL);
+  const response = await fetch(archivedURL);
   const data = await response.json();
+  console.log(data);
 
   for (let i = 0; i < data.length; i++)
   {
@@ -91,14 +100,14 @@ function compose_email() {
   document.querySelector('#compose-body').value = '';
 };
 
-// Reply email function
-function reply_email(recipients, subject, body, timestamp) {
-  // Show compose view and hide other views
+// reply 
+function reply(recipients, subject, body, timestamp) {
+  // show compose view and hide other views
   document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
-  // Clear out composition fields
+  // clear composition fields
   document.querySelector('#compose-recipients').value = recipients;
   document.querySelector('#compose-subject').value = `Re: ${subject}`;
   document.querySelector('#compose-body').value = `On ${timestamp}, ${recipients} wrote: ${body}`;
@@ -114,15 +123,15 @@ function load_mailbox(mailbox) {
 };
 
 function view_email() {
-  //Show email and hide other views
+  // show email and hide other views
   document.querySelector('#email-view').style.display = 'block';
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
 };
 
-// When dom is loaded, create click listeners
+// when dom is loaded create click listeners
 document.addEventListener('DOMContentLoaded', function() {
-  // Use buttons to toggle between views
+  // toggle between views
   document.querySelector('#inbox').addEventListener('click', () => {
     getInbox();
     load_mailbox('inbox');
@@ -140,23 +149,24 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Submit Email Function
+// submit email function
 document.addEventListener('DOMContentLoaded', () => {
-  // Upon click, submit email
+  // upon click, submit email
   document.querySelector('#compose-form').onsubmit = function() {
-    // Get values provided by user
+    // get values provided by user
     const recipients = document.querySelector('#compose-recipients').value;
     const subject = document.querySelector('#compose-subject').value;
     const body = document.querySelector('#compose-body').value;
     
     load_mailbox('sent');
-    // Transform into json
+    // transform into json
     fetch('/emails', {
       method: 'POST',
       body: JSON.stringify({
           recipients: recipients,
           subject: subject,
           body: body,
+          read: false,
       })
     })
     .then(response => response.json())
@@ -169,10 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // on anchor click, show mail content
 function anchorClick(e) {
 
-  // get href of this object
+  // instantiate elements
   let href = this.getAttribute('href');
-
-  // create instances of the following elements
   let div = document.createElement('div');
   let archiveBtn = document.createElement('button');
   let replyBtn = document.createElement('button');
@@ -198,7 +206,7 @@ function anchorClick(e) {
   replyBtn.style.left = '770px';
   replyBtn.innerHTML = 'Reply';
 
-  // Delete all previously opened emails from view and append div to it
+  // delete all opened emails and append div to it
   document.querySelector('#email-view').innerHTML = "";
   document.querySelector('#email-view').append(div);
 
@@ -206,129 +214,88 @@ function anchorClick(e) {
   append_content(href, div, archiveBtn, replyBtn);
   view_email();
   e.preventDefault();
-
-  /* fetch(`${href}`)
-  .then(response => response.json())
-  .then(email => {
-    // Append to div the content below
-    div.append(`${email['subject']} // `);
-    div.append(`From: ${email['sender']}`);
-    div.append(br)
-    div.append(` To: ${email['recipients']}`);
-    div.append(` // ${email['timestamp']}`);
-    div.append(hr);
-    div.append(`${email['body']}`);
-    div.append(archiveBtn);
-    div.append(replyBtn);
-    
-    return email;
-    
-  })
-  .then(email => {
-    replyBtn.addEventListener('click', () => {
-      reply_email(email['recipients'], email['subject'], email['body']), String(email['timestamp']);
-    });
-    return email;
-  })
-  .then(email => {
-    
-  });*/
 };
 
 async function append_content(href, div, button1, button2) {
   const response = await fetch(href);
   const data = await response.json();
-
+  // instantiate
   let br = document.createElement('br');
   let hr = document.createElement('hr');
-  
-  div.append(`${data['subject']} // `);
-  div.append(`From: ${data['sender']}`);
+
+  let subject = data['subject'];
+  let sender = data['sender'];
+  let recipients = data['recipients'];
+  let timestamp = data['timestamp'];
+  let body = data['body'];
+  let archived = data['archived'];
+
+  div.append(`${subject} // `);
+  div.append(`From: ${sender}`);
   div.append(br)
-  div.append(` To: ${data['recipients']}`);
-  div.append(` // ${data['timestamp']}`);
+  div.append(` To: ${recipients}`);
+  div.append(` // ${timestamp}`);
   div.append(hr);
-  div.append(`${data['body']}`);
+  div.append(`${body}`);
 
   div.append(button1);
   div.append(button2);
-  button1.id = 'archiveBtn';
-console.log("data",data);
-
-  if (data['archived'] == true) {
+  
+  if (archived == true) {
     button1.innerHTML = 'Unarchive';
-    button1.addEventListener('click', function(){archiveOrUnarchive(href, button1);});
   }
   else {
     button1.innerHTML = 'Archive';
-    button1.addEventListener('click', function(){archiveOrUnarchive(href, button1);});
   };
-};
 
-async function archive(href, button) {
-  console.log('From unarchive to archive...')
-  const response = await fetch(href, {
-    method: 'PUT',
-    body: JSON.stringify({
-        archived: true
-    })
-  });
-  console.log("status", response.status);
-  
-  if(response.status == 204)
-  {
-    button.innerText = "Unarchive";
-    
-  }
-};
-
-async function unarchive(href, button) {
-  console.log('From archive to unarchive...')
-  //disable
-  const response = await fetch(href, {
-    method: 'PUT',
-    body: JSON.stringify({
-        archived: false
-    })
+  // archive event listener
+  button1.addEventListener('click', () => {
+    archive(href, button1);
+  })
+  // reply event listener
+  button2.addEventListener('click', () => {
+    reply(recipients, subject, body, timestamp)
   });
 
-  //.then -> enable mudava nome.
-  console.log("status", response.status);
-  if(response.status == 204)
-  {
-    button.innerText = "Archive";
-  }
 };
 
-async function archiveOrUnarchive(href, button){
-  if(button.innerText == "Archive"){
-    console.log('From unarchive to archive...')
+// switch between archive and unarchive requests
+async function archive(href, button){
+  if(button.innerText == 'Archive'){
+    // send put request
     const response = await fetch(href, {
       method: 'PUT',
       body: JSON.stringify({
           archived: true
       })
-    });  
-    if(response.status == 204)
-    {
-      button.innerText = "Unarchive";
+    });
+    // if response status is ok, switch the button text
+    if(response.status == 204) {
+      button.innerText = 'Unarchive';
+      getInbox();
+      load_mailbox('inbox');
     }
+    else { 
+      console.log('ERROR')
+    };
   }
-  else
-  {
+  else {
     console.log('From archive to unarchive...')
-    //disable ao butao -> button.disabled = true.
+    // switching
     const response = await fetch(href, {
       method: 'PUT',
       body: JSON.stringify({
           archived: false
       })
-    });
-    //.then -> enable mudar nome.
-    if(response.status == 204)
-    {
-      button.innerText = "Archive";
-    }
-    //else -> mesagem erro, se quiseres
-  }
-}
+    })
+    .then 
+    console.log(response.status);
+    button.innerText = 'Archive';
+    getInbox();
+    load_mailbox(inbox);
+
+    
+    
+  };
+};
+
