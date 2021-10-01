@@ -179,6 +179,7 @@ function anchorClick(e) {
   // mark as read
   let href = this.getAttribute('href');
   read_mail(href);
+
   // instantiate elements
   let div = document.createElement('div');
   let archiveBtn = document.createElement('button');
@@ -208,7 +209,7 @@ function anchorClick(e) {
   // delete all opened emails and append div to it
   document.querySelector('#email-view').innerHTML = "";
   document.querySelector('#email-view').append(div);
-
+  
   // add content to email-view and show it
   append_content(href, div, archiveBtn, replyBtn);
   view_email();
